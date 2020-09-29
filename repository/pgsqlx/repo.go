@@ -1,29 +1,25 @@
 package pgsqlx
 
 import (
+	"log"
+
+	_ "github.com/lib/pq"
+
 	"github.com/jmoiron/sqlx"
 )
 
-//go:generate mockgen -source=./repo.go -destination=./repo_mock.go -package=pgsqlx
-
-type Repository interface {
-	GetUserByID(id int64) User
-}
-
-type repository struct {
+type Repository struct {
 	DB *sqlx.DB
 }
 
-func NewRepository(db *sqlx.DB) Repository {
-	return repository{
-		DB: db,
-	}
+func NewSqlxDB(datasource string) *sqlx.DB {
+	db, err := sqlx.Connect("postgres", datasource)
+	log.Println(err)
+	return db
 }
 
-func (repo repository) GetUserByID(id int64) User {
-	return User{
-		ID:     0,
-		Name:   "",
-		Gender: 0,
+func NewRepository(db *sqlx.DB) Repository {
+	return Repository{
+		DB: db,
 	}
 }

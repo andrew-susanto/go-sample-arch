@@ -10,39 +10,39 @@ import (
 	reflect "reflect"
 )
 
-// MockUsecase is a mock of Usecase interface
-type MockUsecase struct {
+// MockUserService is a mock of UserService interface
+type MockUserService struct {
 	ctrl     *gomock.Controller
-	recorder *MockUsecaseMockRecorder
+	recorder *MockUserServiceMockRecorder
 }
 
-// MockUsecaseMockRecorder is the mock recorder for MockUsecase
-type MockUsecaseMockRecorder struct {
-	mock *MockUsecase
+// MockUserServiceMockRecorder is the mock recorder for MockUserService
+type MockUserServiceMockRecorder struct {
+	mock *MockUserService
 }
 
-// NewMockUsecase creates a new mock instance
-func NewMockUsecase(ctrl *gomock.Controller) *MockUsecase {
-	mock := &MockUsecase{ctrl: ctrl}
-	mock.recorder = &MockUsecaseMockRecorder{mock}
+// NewMockUserService creates a new mock instance
+func NewMockUserService(ctrl *gomock.Controller) *MockUserService {
+	mock := &MockUserService{ctrl: ctrl}
+	mock.recorder = &MockUserServiceMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
+func (m *MockUserService) EXPECT() *MockUserServiceMockRecorder {
 	return m.recorder
 }
 
-// GetUser mocks base method
-func (m *MockUsecase) GetUser(id int64) entity.User {
+// GetUserByID mocks base method
+func (m *MockUserService) GetUserByID(id int64) entity.User {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser", id)
+	ret := m.ctrl.Call(m, "GetUserByID", id)
 	ret0, _ := ret[0].(entity.User)
 	return ret0
 }
 
-// GetUser indicates an expected call of GetUser
-func (mr *MockUsecaseMockRecorder) GetUser(id interface{}) *gomock.Call {
+// GetUserByID indicates an expected call of GetUserByID
+func (mr *MockUserServiceMockRecorder) GetUserByID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUsecase)(nil).GetUser), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockUserService)(nil).GetUserByID), id)
 }

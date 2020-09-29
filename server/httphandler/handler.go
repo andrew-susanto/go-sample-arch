@@ -5,17 +5,16 @@ import (
 	"net/http"
 
 	"github.com/joez-tkpd/go-sample-arch/infrastructure/infrahttp"
-	"github.com/joez-tkpd/go-sample-arch/usecase/account"
 )
 
 type Handler struct {
-	router  infrahttp.Router
-	account account.Usecase
+	router infrahttp.Router
+	user   UserUsecase
 	// middleware
 }
 
-func NewHandler(account account.Usecase) Handler {
-	return Handler{account: account}
+func NewHandler(user UserUsecase) Handler {
+	return Handler{user: user}
 }
 
 func (h Handler) Register(router infrahttp.Router) {

@@ -22,12 +22,12 @@ func NewGoCache() *cache.Cache {
 	return cache.New(15*time.Minute, 10*time.Minute)
 }
 
-type Repository interface {
-	Get(string) (val interface{}, isExists bool)
-	GetString(string) (val string, isExists bool)
-	SetNoExpiry(string, interface{}) error
-	Delete(string) error
-}
+// type Repository interface {
+// 	Get(string) (val interface{}, isExists bool)
+// 	GetString(string) (val string, isExists bool)
+// 	SetNoExpiry(string, interface{}) error
+// 	Delete(string) error
+// }
 
 func (repo repository) Get(key string) (interface{}, bool) {
 	return repo.GoCache.Get(key)

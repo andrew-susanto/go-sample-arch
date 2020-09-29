@@ -5,9 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	_ "github.com/lib/pq"
-
-	"github.com/jmoiron/sqlx"
 	"github.com/joez-tkpd/go-sample-arch/infrastructure/infrahttp"
 	"github.com/joez-tkpd/go-sample-arch/repository/pgsqlx"
 	"github.com/joez-tkpd/go-sample-arch/repository/redispool"
@@ -19,6 +16,7 @@ import (
 func main() {
 	var port string
 
+	log.SetFlags(log.LstdFlags | log.Llongfile)
 	flag.StringVar(&port, "port", "8000", "serve port")
 	flag.Parse()
 
@@ -32,8 +30,8 @@ func main() {
 }
 
 func initHandler() httphandler.Handler {
-	sqlxDB, _ := sqlx.Connect("postgres", "user=user password=user host=localhost port=5432 sslmode=disable")
-	redis := redispool.NewRedisPool()
+	sqlxDB := pgsqlx.NewSqlxDB("user=user password=user host=localhost port=5432 sslmode=disable")
+	redis := redispool.NewRedisPool("localhost:6379")
 
 	pgsqlxRepo := pgsqlx.NewRepository(sqlxDB)
 	redisRepo := redispool.NewResource(redis)
