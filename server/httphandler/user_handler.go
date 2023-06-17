@@ -1,40 +1,38 @@
 package httphandler
 
 import (
+	// golang package
 	"encoding/json"
 	"net/http"
-	"strconv"
 
-	"github.com/joez-tkpd/go-sample-arch/entity"
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/errors"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/httpcontext"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/log"
 )
 
-//go:generate mockgen -source=./user_handler.go -destination=./user_handler_mock.go -package=httphandler
+// GetUserHandler handles get user request
+//
+// Returns nil error if success
+// Otherwise return non nil error
+func (handler *Handler) GetUserHandler(tdkCtx *httpcontext.TdkHttpContext) error {
+	var param GetUserParam
 
-type UserUsecase interface {
-	GetUser(id int64) entity.User
-}
-
-func (h Handler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	paramID, ok := h.router.GetRouteParams(r)["id"]
-	if !ok {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	id, err := strconv.ParseInt(paramID, 10, 64)
+	err := json.NewDecoder(tdkCtx.Request.Body).Decode(&param)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		log.Error(err, nil, "json.NewDecoder() got error - GetUserHandler")
+		return err
 	}
 
-	user := h.user.GetUser(id)
-	// user.ID = id
+	user, err := handler.user.GetUser(tdkCtx.Context, param.ID)
+	if err != nil {
+		err = errors.Wrap(err).WithCode("HNDL.GUH00")
+		log.Error(err, nil, "handler.user.GetUser() got error - GetUserHandler")
+		return err
+	}
 
-	encoded, _ := json.Marshal(user)
+	respUser := GetUserResponse(user)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(encoded)
-	return
+	tdkCtx.WriteHTTPResponseToJSON(respUser, http.StatusOK)
+	return nil
 }

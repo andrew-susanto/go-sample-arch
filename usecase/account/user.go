@@ -1,15 +1,25 @@
 package account
 
 import (
-	"github.com/joez-tkpd/go-sample-arch/entity"
+	// golang package
+	"context"
+
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/errors"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/log"
 )
 
-//go:generate mockgen -source=./user.go -destination=./user_mock.go -package=account
+// GetUser gets user by id
+//
+// Returns entity user and nil error if success
+// Otherwise returns empty entity user and non-nil error
+func (usecase *Usecase) GetUser(ctx context.Context, ID int64) (User, error) {
+	user, err := usecase.user.GetUserByID(ctx, ID)
+	if err != nil {
+		err = errors.Wrap(err).WithCode("UC.GC00")
+		log.Error(err, ID, "usecase.user.GetUserByID() got error - GetUser")
+		return User{}, err
+	}
 
-type UserService interface {
-	GetUserByID(id int64) entity.User
-}
-
-func (uc Usecase) GetUser(id int64) entity.User {
-	return uc.user.GetUserByID(id)
+	return User(user), nil
 }

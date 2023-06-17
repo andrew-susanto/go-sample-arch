@@ -1,19 +1,26 @@
 package user
 
 import (
-	"github.com/joez-tkpd/go-sample-arch/entity"
-	"github.com/joez-tkpd/go-sample-arch/repository/redispool"
+	// golang package
+	"context"
+
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/entity"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/errors"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/log"
 )
 
-//go:generate mockgen -source=./resource_cache.go -destination=./resource_cache_mock.go -package=user
-
-type CacheRepository interface {
-	SetUser(user redispool.User)
-	GetUserByID(id int64) redispool.User
-}
-
-func (rsc resource) GetUserByIDCache(id int64) entity.User {
-	user := rsc.Cache.GetUserByID(id)
+// GetUserByIDFromCache gets user by id from cache service
+//
+// Returns entity user and nil error if success
+// Otherwise returns empty entity user and non-nil error
+func (resource *resource) GetUserByIDFromCache(ctx context.Context, ID int64) (entity.User, error) {
+	user, err := resource.cache.GetUserByID(ctx, ID)
+	if err != nil {
+		err = errors.Wrap(err).WithCode("RSC.GUBIFC00")
+		log.Error(err, ID, "resource.cache.GetUserByID() got erro - GetUserByIDFromCache")
+		return entity.User{}, err
+	}
 
 	// convert to general entity object
 	result := entity.User{
@@ -23,16 +30,5 @@ func (rsc resource) GetUserByIDCache(id int64) entity.User {
 		Gender:    user.Gender,
 	}
 
-	return result
-}
-
-func (rsc resource) SetUserCache(user entity.User) error {
-	rsc.Cache.SetUser(redispool.User{
-		user.ID,
-		user.FirstName,
-		user.LastName,
-		user.Gender,
-	})
-
-	return nil
+	return result, nil
 }

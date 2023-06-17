@@ -1,0 +1,36 @@
+feature_flag:
+  test_feature_key: abc
+  test_feature_key_bool: true
+
+aws:
+  region: ap-southeast1
+
+rpc_client:
+  cxpigw_trip:
+    service_url: https://cxpigw.cxp.stg-tvlk.cloud/igw/trip
+    service_name: cxpigw_trip
+    timeout: 10000
+    max_concurrent: 10
+    error_percentage: 20
+
+http_client:
+  http_client_other_service_endpoint_and_method_name_1:
+    timeout: 10000
+    max_concurrent: 10
+    error_percentage: 20
+  http_client_other_service_endpoint_and_method_name_2:
+    timeout: 10000
+    max_concurrent: 10
+    error_percentage: 20
+
+sqs:
+  issuance_job_fifo:
+    queue_name: cxpcrmj-issuancejob
+    max_number_message: 10
+    poll_period_in_milisecond: 1000
+    enabled: true
+  myinbox:
+    queue_name: cxpmsg-myinboxevent
+    max_number_message: 10
+    poll_period_in_milisecond: 1000
+    enabled: true

@@ -1,23 +1,36 @@
 package user
 
 import (
-	"github.com/joez-tkpd/go-sample-arch/entity"
+	// golang package
+	"context"
+
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/errors"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/log"
 )
 
-type Service struct {
-	resource Resource
-}
-
-func NewService(rsc Resource) Service {
-	return Service{
-		resource: rsc,
-	}
-}
-
-func (svc Service) GetUserByID(id int64) entity.User {
-	if user := svc.resource.GetUserByIDCache(id); user.ID > 1 {
-		return user
+// GetUserByID gets user by id
+//
+// Returns entity user and nil error if success
+// Otherwise returns empty entity user and non-nil error
+func (svc *Service) GetUserByID(ctx context.Context, ID int64) (User, error) {
+	user, err := svc.resource.GetUserByIDFromCache(ctx, ID)
+	if err != nil {
+		err = errors.Wrap(err).WithCode("SVC.GUBI00")
+		log.Error(err, nil, "svc.resource.GetUserByIDFromCache() got error - GetUserByID")
+		return User{}, err
 	}
 
-	return svc.resource.GetUserByIDDB(id)
+	if user.ID > 0 {
+		return User(user), nil
+	}
+
+	user, err = svc.resource.GetUserByIDFromDB(ctx, ID)
+	if err != nil {
+		err = errors.Wrap(err).WithCode("SVC.GUBI01")
+		log.Error(err, nil, "svc.resource.GetUserByIDFromDB() got error - GetUserByID")
+		return User{}, err
+	}
+
+	return User(user), nil
 }

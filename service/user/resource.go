@@ -1,22 +1,41 @@
 package user
 
-import "github.com/joez-tkpd/go-sample-arch/entity"
+import (
+	// golang package
+	"context"
 
-type Resource interface {
-	GetUserByIDDB(id int64) entity.User
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/repository/cache"
+	"github.com/andrew-susanto/go-sample-arch/repository/psql"
+)
 
-	GetUserByIDCache(id int64) entity.User
-	SetUserCache(user entity.User) error
+//go:generate mockgen -source=./resource.go -destination=./resource_mock.go -package=user
+
+type CacheRepository interface {
+	// GetUserByIDFromCache gets user by id from cache service
+	//
+	// Returns entity user and nil error if success
+	// Otherwise returns empty entity user and non-nil error
+	GetUserByID(ctx context.Context, ID int64) (cache.User, error)
+}
+
+type DBRepository interface {
+	// GetUserByIDFromDB gets user by id from db service
+	//
+	// Returns entity user and nil error if success
+	// Otherwise returns empty entity user and non-nil error
+	GetUserByID(ctx context.Context, ID int64) (psql.User, error)
 }
 
 type resource struct {
-	DB    DBRepository
-	Cache CacheRepository
+	cache CacheRepository
+	db    DBRepository
 }
 
-func NewResource(db DBRepository, cache CacheRepository) resource {
+// NewResource creates new user resource
+func NewResource(cache CacheRepository, db DBRepository) resource {
 	return resource{
-		DB:    db,
-		Cache: cache,
+		cache: cache,
+		db:    db,
 	}
 }

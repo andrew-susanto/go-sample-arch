@@ -1,26 +1,34 @@
 package user
 
 import (
-	"github.com/joez-tkpd/go-sample-arch/entity"
-	"github.com/joez-tkpd/go-sample-arch/repository/pgsqlx"
+	// golang package
+	"context"
+
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/entity"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/errors"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/log"
 )
 
-//go:generate mockgen -source=./resource_db.go -destination=./resource_db_mock.go -package=user
-
-type DBRepository interface {
-	GetUserByID(id int64) pgsqlx.User
-}
-
-func (rsc resource) GetUserByIDDB(id int64) entity.User {
-	user := rsc.DB.GetUserByID(id)
+// GetUserByIDFromDB gets user by id from db service
+//
+// Returns entity user and nil error if success
+// Otherwise returns empty entity user and non-nil error
+func (resource *resource) GetUserByIDFromDB(ctx context.Context, ID int64) (entity.User, error) {
+	user, err := resource.db.GetUserByID(ctx, ID)
+	if err != nil {
+		err = errors.Wrap(err).WithCode("RSC.GUBIFDB00")
+		log.Error(err, nil, "resource.db.GetUserByID() got error - GetUserByIDFromDB")
+		return entity.User{}, err
+	}
 
 	// convert to general entity object
 	result := entity.User{
 		ID:        user.ID,
 		FirstName: user.Name,
-		LastName:  "", // not provided
+		LastName:  "",
 		Gender:    user.Gender,
 	}
 
-	return result
+	return result, nil
 }

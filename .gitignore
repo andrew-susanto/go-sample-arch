@@ -7,5 +7,7 @@ sampleapp.exe
 *.out
 
 # Dependency directories (remove the comment below to include it)
-log/
 vendor/
+log/
+!infrastructure/log/
+.env

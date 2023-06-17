@@ -1,37 +1,47 @@
 package httphandler
 
 import (
-	"io"
+	// go package
+	"context"
 	"net/http"
 
-	"github.com/joez-tkpd/go-sample-arch/infrastructure/infrahttp"
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/httpcontext"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/monitor"
+	"github.com/andrew-susanto/go-sample-arch/usecase/account"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+//go:generate mockgen -source=./handler.go -destination=./handler_mock.go -package=httphandler
+type UserUsecase interface {
+	GetUser(ctx context.Context, ID int64) (account.User, error)
+}
+
 type Handler struct {
-	router infrahttp.Router
-	user   UserUsecase
-	// middleware
+	user UserUsecase
 }
 
+// NewHandler initializes new http handler based on given usecase
 func NewHandler(user UserUsecase) Handler {
-	return Handler{user: user}
+	return Handler{
+		user: user,
+	}
 }
 
-func (h Handler) Register(router infrahttp.Router) {
-	h.router = router
+// Register registers http handler
+func (h *Handler) Register(monitor monitor.Monitor) http.Handler {
+	router := http.NewServeMux()
+	router.HandleFunc("/health", h.handleFunc(monitor, h.HealthCheckHandler))
+	router.HandleFunc("/user/{id}", h.handleFunc(monitor, h.GetUserHandler))
 
-	router.HandleFunc("/", h.YourHandler)
-	router.HandleFunc("/health", h.HealthCheckHandler)
-	router.HandleFunc("/user/{id}", h.GetUserHandler)
+	handler := otelhttp.NewHandler(router, "httphandler")
+	return handler
 }
 
-func (h Handler) YourHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Gorilla!\n"))
-}
-
-func (h Handler) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	io.WriteString(w, `{"alive": true}`)
+// HealthCheckHandler handles health check request
+func (h *Handler) HealthCheckHandler(tdkCtx *httpcontext.TdkHttpContext) error {
+	tdkCtx.WriteHTTPResponseToJSON(map[string]interface{}{
+		"status": "OK",
+	}, http.StatusOK)
+	return nil
 }
