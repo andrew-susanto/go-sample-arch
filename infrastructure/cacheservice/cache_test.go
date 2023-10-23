@@ -4,6 +4,9 @@ import (
 	// golang package
 	"testing"
 
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/secretmanager"
+
 	// external package
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
@@ -11,9 +14,7 @@ import (
 
 func TestInfrastructure_InitCache(t *testing.T) {
 	type args struct {
-		host     string
-		port     string
-		password string
+		config secretmanager.SecretsRedis
 	}
 
 	tests := []struct {
@@ -25,9 +26,11 @@ func TestInfrastructure_InitCache(t *testing.T) {
 		{
 			name: "when_given_host_port_and_password_then_return_cache_service",
 			args: args{
-				host:     "localhost",
-				port:     "1234",
-				password: "test",
+				config: secretmanager.SecretsRedis{
+					Host:     "localhost",
+					Port:     "1234",
+					Password: "test",
+				},
 			},
 			want: redis.NewClient(&redis.Options{
 				Addr:     "localhost:1234",
@@ -39,7 +42,7 @@ func TestInfrastructure_InitCache(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := InitCache(tt.args.host, tt.args.port, tt.args.password)
+			client := InitCache(tt.args.config)
 			_, ok := client.(*redis.Client)
 			assert.True(t, ok)
 		})

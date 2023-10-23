@@ -9,7 +9,7 @@ rpc_client:
   cxpigw_trip:
     service_url: https://cxpigw.cxp.stg-tvlk.cloud/igw/trip
     service_name: cxpigw_trip
-    timeout: 10000
+    timeout: 60000
     max_concurrent: 10
     error_percentage: 20
 

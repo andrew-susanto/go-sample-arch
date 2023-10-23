@@ -8,6 +8,7 @@ import (
 
 	// internal package
 	"github.com/andrew-susanto/go-sample-arch/infrastructure/log"
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/secretmanager"
 
 	// external package
 	"github.com/jmoiron/sqlx"
@@ -51,11 +52,11 @@ type Database interface {
 }
 
 // InitDatabaseClient initialize database client
-func InitDatabaseClient(host string, port string, username string, password string, db_name string) Database {
+func InitDatabaseClient(config secretmanager.SecretsPostgreSQL) Database {
 	var err error
 
 	// connection string
-	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, db_name)
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", config.Host, config.Port, config.Username, config.Password, config.DBName)
 
 	// connect database
 	psqlDb, err := sqlx.Connect("postgres", psqlconn)

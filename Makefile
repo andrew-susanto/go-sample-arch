@@ -14,5 +14,10 @@ run:
 	make build
 	@./sampleapp
 
+runconsumer:
+	@echo "RUN sampleapp..."
+	make build
+	@./sampleapp -mode=consumer
+
 test:
 	@go test -v -race ./...

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	// external package
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/stretchr/testify/assert"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -33,8 +34,8 @@ func TestRepository_GetUserByID(t *testing.T) {
 				Gender: 3,
 			},
 			wantErr: nil,
-			mockFunc: func(sqs *MockSQSPublisher) {
-				sqs.EXPECT().SendMessage(gomock.Any(), gomock.Any()).Return(nil, nil)
+			mockFunc: func(mockSqs *MockSQSPublisher) {
+				mockSqs.EXPECT().SendMessage(context.Background(), &sqs.SendMessageInput{}).Return(nil, nil)
 			},
 		},
 	}

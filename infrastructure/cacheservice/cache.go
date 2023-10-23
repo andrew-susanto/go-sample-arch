@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	// internal package
+	"github.com/andrew-susanto/go-sample-arch/infrastructure/secretmanager"
+
 	// external package
 	"github.com/redis/go-redis/v9"
 )
@@ -20,10 +23,10 @@ type Cache interface {
 }
 
 // InitCache is function to initialize cache connection
-func InitCache(host string, port string, password string) Cache {
+func InitCache(config secretmanager.SecretsRedis) Cache {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%v:%v", host, port),
-		Password: password,
+		Addr:     fmt.Sprintf("%v:%v", config.Host, config.Port),
+		Password: config.Password,
 		DB:       0, // use default DB
 	})
 
