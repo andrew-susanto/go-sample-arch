@@ -1,4 +1,4 @@
-package httphandler
+package user
 
 // GetUserParam is a struct that represents request parameter for GetUserHandler
 type GetUserParam struct {

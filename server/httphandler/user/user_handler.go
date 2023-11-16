@@ -1,4 +1,4 @@
-package httphandler
+package user
 
 import (
 	// golang package
@@ -11,23 +11,23 @@ import (
 	"github.com/andrew-susanto/go-sample-arch/infrastructure/log"
 )
 
-// GetUserHandler handles get user request
+// HandleGetUser handles get user request
 //
 // Returns nil error if success
 // Otherwise return non nil error
-func (handler *Handler) GetUserHandler(tdkCtx *httpcontext.TdkHttpContext) error {
+func (handler *Handler) HandleGetUser(tdkCtx *httpcontext.TdkHttpContext) error {
 	var param GetUserParam
 
 	err := json.NewDecoder(tdkCtx.Request.Body).Decode(&param)
 	if err != nil {
-		log.Error(err, nil, "json.NewDecoder() got error - GetUserHandler")
+		log.Error(err, nil, "json.NewDecoder() got error - HandleGetUser")
 		return err
 	}
 
 	user, err := handler.user.GetUser(tdkCtx.Context, param.ID)
 	if err != nil {
 		err = errors.Wrap(err).WithCode("HNDL.GUH00")
-		log.Error(err, nil, "handler.user.GetUser() got error - GetUserHandler")
+		log.Error(err, nil, "handler.user.GetUser() got error - HandleGetUser")
 		return err
 	}
 

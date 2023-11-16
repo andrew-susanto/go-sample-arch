@@ -37,7 +37,10 @@ import (
 	snsRepo "github.com/andrew-susanto/go-sample-arch/repository/sns"
 	sqsRepo "github.com/andrew-susanto/go-sample-arch/repository/sqs"
 	"github.com/andrew-susanto/go-sample-arch/server/httphandler"
+	userHttpHandler "github.com/andrew-susanto/go-sample-arch/server/httphandler/user"
 	"github.com/andrew-susanto/go-sample-arch/server/jsonrpchandler"
+	tripJsonRpcHandler "github.com/andrew-susanto/go-sample-arch/server/jsonrpchandler/trip"
+	userJsonRpcHandler "github.com/andrew-susanto/go-sample-arch/server/jsonrpchandler/user"
 	"github.com/andrew-susanto/go-sample-arch/service/cxpigw"
 	"github.com/andrew-susanto/go-sample-arch/service/user"
 	"github.com/andrew-susanto/go-sample-arch/usecase/account"
@@ -114,12 +117,15 @@ func initHttpApp(httpServerPort string, rpcServerPort string) {
 	tripUc := trip.NewUsecase(&cxpigwSvc)
 
 	// http handler
-	httpHandler := httphandler.NewHandler(&accountUc)
-	httpMuxRouter := httpHandler.Register(monitor)
+	userHttpHandler := userHttpHandler.NewHandler(&accountUc)
+	httpHandler := httphandler.NewHandler(&userHttpHandler, monitor)
+	httpMuxRouter := httpHandler.Register()
 
 	// json rpc handler
-	jsonRpcHandler := jsonrpchandler.NewHandler(&accountUc, &tripUc)
-	jsonRpcMuxRouter := jsonRpcHandler.Register(monitor)
+	userJsonRpcHandler := userJsonRpcHandler.NewHandler(&accountUc)
+	tripJsonRpcHandler := tripJsonRpcHandler.NewHandler(&tripUc)
+	jsonRpcHandler := jsonrpchandler.NewHandler(&userJsonRpcHandler, &tripJsonRpcHandler, monitor)
+	jsonRpcMuxRouter := jsonRpcHandler.Register()
 
 	var httpSrv *http.Server
 	var jsonRpcSrv *http.Server

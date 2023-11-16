@@ -1,4 +1,4 @@
-package sqshandler
+package user
 
 import (
 	// golang package

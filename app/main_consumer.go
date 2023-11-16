@@ -34,7 +34,9 @@ import (
 	snsRepo "github.com/andrew-susanto/go-sample-arch/repository/sns"
 	sqsRepo "github.com/andrew-susanto/go-sample-arch/repository/sqs"
 	"github.com/andrew-susanto/go-sample-arch/server/cronhandler"
+	userCronHandler "github.com/andrew-susanto/go-sample-arch/server/cronhandler/user"
 	"github.com/andrew-susanto/go-sample-arch/server/sqshandler"
+	userSqsHandler "github.com/andrew-susanto/go-sample-arch/server/sqshandler/user"
 	"github.com/andrew-susanto/go-sample-arch/service/cxpigw"
 	"github.com/andrew-susanto/go-sample-arch/service/user"
 	"github.com/andrew-susanto/go-sample-arch/usecase/account"
@@ -111,10 +113,12 @@ func initConsumerApp() {
 	_ = trip.NewUsecase(&cxpigwSvc)
 
 	// sqs handler
-	sqsHandler := sqshandler.NewHandler(&accountUc)
+	userSqsHandler := userSqsHandler.NewHandler(&accountUc)
+	sqsHandler := sqshandler.NewHandler(&userSqsHandler)
 
 	// cron handler
-	cronHandler := cronhandler.NewHandler(&accountUc)
+	userCronHandler := userCronHandler.NewHandler(&accountUc)
+	cronHandler := cronhandler.NewHandler(&userCronHandler)
 
 	var handlerWaitGroup sync.WaitGroup
 

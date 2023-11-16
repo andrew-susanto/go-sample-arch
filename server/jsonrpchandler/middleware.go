@@ -26,7 +26,7 @@ var (
 type JsonRpcFunc func(tdkCtx *jsonrpccontext.TdkJsonRpcContext, param json.RawMessage) (interface{}, error)
 
 // handleFunc is wrapper for json rpc handler
-func (h *Handler) handleFunc(monitorService monitor.Monitor, rpcMethodMap map[string]JsonRpcFunc) http.HandlerFunc {
+func (h *Handler) handleFunc(rpcMethodMap map[string]JsonRpcFunc) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx, cancelCtx := context.WithTimeout(r.Context(), time.Duration(contextDeadlineInSeconds)*time.Second)
 		defer cancelCtx()
@@ -124,7 +124,7 @@ func (h *Handler) handleFunc(monitorService monitor.Monitor, rpcMethodMap map[st
 				if request.ID == nil {
 					wg.Add(1)
 					go func(request jsonrpccontext.JSONRpcRequestSchema) {
-						h.handleRpcFunc(monitorService, &tdkCtx, rpcMethodMap, request)
+						h.handleRpcFunc(&tdkCtx, rpcMethodMap, request)
 						wg.Done()
 					}(request)
 					continue
@@ -133,7 +133,7 @@ func (h *Handler) handleFunc(monitorService monitor.Monitor, rpcMethodMap map[st
 				// non-notification therefore expect response
 				wg.Add(1)
 				go func(responseBatchIdx int, request jsonrpccontext.JSONRpcRequestSchema) {
-					responseBatch[responseBatchIdx] = h.handleRpcFunc(monitorService, &tdkCtx, rpcMethodMap, request)
+					responseBatch[responseBatchIdx] = h.handleRpcFunc(&tdkCtx, rpcMethodMap, request)
 					wg.Done()
 				}(responseBatchIdx, request)
 				responseBatchIdx = responseBatchIdx + 1
@@ -154,7 +154,7 @@ func (h *Handler) handleFunc(monitorService monitor.Monitor, rpcMethodMap map[st
 			return
 		}
 
-		response := h.handleRpcFunc(monitorService, &tdkCtx, rpcMethodMap, request)
+		response := h.handleRpcFunc(&tdkCtx, rpcMethodMap, request)
 		if request.ID != nil {
 			tdkCtx.WriteHTTPResponseToJSON(response, 200)
 		}
@@ -198,7 +198,7 @@ func (h *Handler) validateRpcRequest(request json.RawMessage) (jsonrpccontext.JS
 }
 
 // handleRpcFunc is inner handler for rpc to handle single request
-func (h *Handler) handleRpcFunc(monitorService monitor.Monitor, tdkCtx *jsonrpccontext.TdkJsonRpcContext, rpcMethodMap map[string]JsonRpcFunc, request jsonrpccontext.JSONRpcRequestSchema) jsonrpccontext.JSONRpcResponseSchema {
+func (h *Handler) handleRpcFunc(tdkCtx *jsonrpccontext.TdkJsonRpcContext, rpcMethodMap map[string]JsonRpcFunc, request jsonrpccontext.JSONRpcRequestSchema) jsonrpccontext.JSONRpcResponseSchema {
 	metricsTag := []string{}
 
 	var isSuccess bool
@@ -228,10 +228,10 @@ func (h *Handler) handleRpcFunc(monitorService monitor.Monitor, tdkCtx *jsonrpcc
 	countMetricsName := fmt.Sprintf("%s.count", monitor.MetricsPrefix)
 	metricsTag = append(metricsTag, fmt.Sprintf("success:%v", isSuccess))
 	metricsTag = append(metricsTag, fmt.Sprintf("method:%v", request.MethodName))
-	monitorService.Incr(countMetricsName, metricsTag, 1)
+	h.monitor.Incr(countMetricsName, metricsTag, 1)
 
 	gaugeMetricsName := fmt.Sprintf("%s.duration", monitor.MetricsPrefix)
-	monitorService.Gauge(gaugeMetricsName, float64(time.Since(start).Microseconds()), []string{
+	h.monitor.Gauge(gaugeMetricsName, float64(time.Since(start).Microseconds()), []string{
 		fmt.Sprintf("method:%v", request.MethodName),
 	}, 1)
 

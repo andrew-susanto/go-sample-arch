@@ -1,4 +1,4 @@
-package jsonrpchandler
+package trip
 
 import (
 	// golang package

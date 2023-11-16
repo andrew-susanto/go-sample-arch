@@ -1,4 +1,4 @@
-package jsonrpchandler
+package user
 
 import (
 	// golang package

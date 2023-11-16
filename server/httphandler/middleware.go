@@ -19,7 +19,7 @@ var (
 )
 
 // handleFunc is a wrapper for http handler function
-func (h *Handler) handleFunc(monitorService monitor.Monitor, fn func(tdkCtx *httpcontext.TdkHttpContext) error) http.HandlerFunc {
+func (h *Handler) handleFunc(fn func(tdkCtx *httpcontext.TdkHttpContext) error) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		// recover from panic to prevent server crash
 		defer func() {
@@ -69,14 +69,14 @@ func (h *Handler) handleFunc(monitorService monitor.Monitor, fn func(tdkCtx *htt
 
 		// push metrics
 		countMetricsName := fmt.Sprintf("%s.count", monitor.MetricsPrefix)
-		monitorService.Incr(countMetricsName, []string{
+		h.monitor.Incr(countMetricsName, []string{
 			fmt.Sprintf("success:%v", isSuccess),
 			fmt.Sprintf("path:%v", r.URL.Path),
 			fmt.Sprintf("errorcode:%v", errorConverted.ECode),
 		}, 1)
 
 		gaugeMetricsName := fmt.Sprintf("%s.duration", monitor.MetricsPrefix)
-		monitorService.Gauge(gaugeMetricsName, float64(duration.Microseconds()), []string{
+		h.monitor.Gauge(gaugeMetricsName, float64(duration.Microseconds()), []string{
 			fmt.Sprintf("path:%v", r.URL.Path),
 		}, 1)
 

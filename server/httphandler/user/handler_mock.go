@@ -6,7 +6,7 @@
 //	mockgen -source=./handler.go -destination=./handler_mock.go -package=httphandler
 //
 // Package httphandler is a generated GoMock package.
-package httphandler
+package user
 
 import (
 	context "context"
