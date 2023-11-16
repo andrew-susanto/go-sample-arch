@@ -2,10 +2,8 @@ package jsonrpccontext
 
 import (
 	// golang package
-	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	// internal package
@@ -78,12 +76,9 @@ func (tdkCtx *TdkJsonRpcContext) WriteHTTPResponseToJSON(response JSONRpcRespons
 		errorResponse := tdkCtx.ConvertResponseErrorToRpcFormat(JSONRpcRequestSchema{}, -32603, internalErrorMessage)
 
 		// best effort to handle error parsing
-		fmt.Println(bytes.NewBuffer(js).String())
 		js, _ = json.Marshal(errorResponse)
 		statusCode = http.StatusInternalServerError
 	}
-
-	fmt.Println(bytes.NewBuffer(js).String())
 
 	tdkCtx.Writer.Header().Set("Content-Type", "application/json")
 	tdkCtx.Writer.WriteHeader(statusCode)
@@ -105,12 +100,9 @@ func (tdkCtx *TdkJsonRpcContext) WriteHTTPResponseBatchToJSON(response []JSONRpc
 		errorResponse := tdkCtx.ConvertResponseErrorToRpcFormat(JSONRpcRequestSchema{}, -32603, internalErrorMessage)
 
 		// best effort to handle error parsing
-		fmt.Println(bytes.NewBuffer(js).String())
 		js, _ = json.Marshal(errorResponse)
 		statusCode = http.StatusInternalServerError
 	}
-
-	fmt.Println(bytes.NewBuffer(js).String())
 
 	tdkCtx.Writer.Header().Set(contentTypeKey, contentTypeValue)
 	tdkCtx.Writer.WriteHeader(statusCode)
