@@ -19,6 +19,27 @@ var (
 
 // InitSecretManager initialize aws secrets manager
 func InitSecretManager(config aws.Config) Secrets {
+	// for local testing
+	return Secrets{
+		Postgresql: SecretsPostgreSQL{
+			Host:     "127.0.0.1",
+			Port:     "5432",
+			Username: "postgres",
+			Password: "postgres",
+			DBName:   "sampleapp",
+		},
+		Redis: SecretsRedis{
+			Host: "127.0.0.1",
+			Port: "6379",
+		},
+		DocDB: SecretsDocDb{
+			DBName:          "tvlk-cxpcrmm",
+			Username:        "admintraveloka",
+			Password:        "traveloka123",
+			ClusterEndpoint: "cxpcrmm-docdb.cxp.stg-tvlk.cloud",
+		},
+	}
+
 	client := secretsmanager.NewFromConfig(config)
 	result, err := client.GetSecretValue(context.Background(), &secretsmanager.GetSecretValueInput{
 		SecretId: &secretsName,
